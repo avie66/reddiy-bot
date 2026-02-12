@@ -5,10 +5,9 @@ from pathlib import Path
 from flexus_client_kit import ckit_client, ckit_bot_install, ckit_cloudtool
 from flexus_client_kit.ckit_bot_install import FMarketplaceExpertInput
 from reddiy import reddiy_prompts
-from reddiy.integrations import fi_reddit
 
 BOT_NAME = "reddiy"
-BOT_VERSION = "0.1.0"
+BOT_VERSION = "0.2.0"
 
 REDDIY_SETUP_SCHEMA = [
     {
@@ -20,22 +19,30 @@ REDDIY_SETUP_SCHEMA = [
         "bs_importance": 0,
     },
     {
-        "bs_name": "BRAND_MENTION_STYLE",
+        "bs_name": "BRAND_TONE",
         "bs_type": "string_short",
-        "bs_default": "moderate",
+        "bs_default": "professional",
         "bs_group": "Engagement",
-        "bs_description": "How often to mention Flexus: subtle, moderate, or direct",
+        "bs_description": "Brand tone: casual, professional, or technical",
         "bs_importance": 1,
     },
     {
-        "bs_name": "MAX_POSTS_PER_DAY",
-        "bs_type": "int",
-        "bs_default": 20,
+        "bs_name": "ENGAGEMENT_GOAL",
+        "bs_type": "string_short",
+        "bs_default": "awareness",
         "bs_group": "Engagement",
-        "bs_description": "Maximum posts per day across all subreddits",
+        "bs_description": "Primary goal: awareness, leads, or community",
         "bs_importance": 1,
     },
-] + fi_reddit.REDDIT_SETUP_SCHEMA
+    {
+        "bs_name": "WEEKLY_ENGAGEMENT_TARGET",
+        "bs_type": "int",
+        "bs_default": 10,
+        "bs_group": "Engagement",
+        "bs_description": "Target number of posts per week",
+        "bs_importance": 1,
+    },
+]
 
 async def install(
     client: ckit_client.FlexusClient,
@@ -55,20 +62,20 @@ async def install(
         marketable_version=bot_version,
         marketable_accent_color="#FF6B35",
         marketable_title1="Reddiy",
-        marketable_title2="Reddit engagement specialist for Flexus brand awareness",
+        marketable_title2="Manual Reddit Workflow Assistant",
         marketable_author="Flexus",
-        marketable_occupation="Brand Awareness Specialist",
-        marketable_description="Reddiy builds authentic Flexus brand awareness on Reddit through value-first engagement. Monitors target subreddits, generates contextual replies, and maintains safety through approval workflows and risk detection.",
+        marketable_occupation="Reddit Engagement Strategist",
+        marketable_description="Reddiy is your Reddit engagement strategist - helping you identify opportunities, draft authentic replies, and track performance without any Reddit API automation. Manual posting workflow maintains authenticity while providing strategic guidance and analytics.",
         marketable_typical_group="Marketing",
         marketable_github_repo="",
         marketable_run_this="python -m reddiy.reddiy_bot",
         marketable_setup_default=REDDIY_SETUP_SCHEMA,
         marketable_featured_actions=[
-            {"feat_question": "Check Reddit status and recent activity", "feat_expert": "default", "feat_depends_on_setup": ["REDDIT_REFRESH_TOKEN"]},
-            {"feat_question": "Monitor subreddits for new opportunities", "feat_expert": "default", "feat_depends_on_setup": ["REDDIT_REFRESH_TOKEN"]},
-            {"feat_question": "Show me analytics and insights", "feat_expert": "default", "feat_depends_on_setup": ["REDDIT_REFRESH_TOKEN"]},
+            {"feat_question": "Analyze r/startups for opportunities", "feat_expert": "default", "feat_depends_on_setup": []},
+            {"feat_question": "Suggest relevant subreddits for Flexus", "feat_expert": "default", "feat_depends_on_setup": []},
+            {"feat_question": "Show me engagement insights", "feat_expert": "default", "feat_depends_on_setup": []},
         ],
-        marketable_intro_message="👋 I'm Reddiy! I help build Flexus brand awareness on Reddit through authentic, value-first engagement. Let me check if you have Reddit API credentials set up...",
+        marketable_intro_message="👋 I'm Reddiy, your Reddit engagement strategist! I help you find opportunities, draft replies, and track performance. You post manually to keep it authentic. Ready to start?",
         marketable_preferred_model_default="grok-4-1-fast-reasoning",
         marketable_daily_budget_default=100,
         marketable_default_inbox_default=0,
@@ -81,36 +88,30 @@ async def install(
                 fexp_block_tools="",
                 fexp_allow_tools="",
                 fexp_app_capture_tools=bot_internal_tools,
-                fexp_description="Main expert for Reddit engagement, monitoring, and brand awareness",
+                fexp_description="Manual Reddit workflow assistant - identifies opportunities, drafts replies, tracks performance",
             )),
         ],
         marketable_schedule=[
             {
                 "sched_type": "SCHED_ANY",
-                "sched_when": "EVERY:15m",
-                "sched_first_question": "Run reddit_monitor to check for new opportunities, then use reddit_reply for promising posts",
-                "sched_fexp_name": "default",
-            },
-            {
-                "sched_type": "SCHED_ANY",
-                "sched_when": "EVERY:24h",
-                "sched_first_question": "Run reddit_status to check health, then reddit_insights to generate analytics. Post a summary to kanban.",
+                "sched_when": "WEEKDAYS:MO:FR/08:00",
+                "sched_first_question": "Good morning! Generate a daily opportunity digest: analyze target subreddits and present top 5 opportunities with scores and next steps.",
                 "sched_fexp_name": "default",
             },
             {
                 "sched_type": "SCHED_TASK_SORT",
-                "sched_when": "EVERY:5m",
-                "sched_first_question": "Check inbox for approval tasks, prioritize and move to TODO",
+                "sched_when": "EVERY:10m",
+                "sched_first_question": "Check inbox for user questions or engagement reports, prioritize and move to TODO",
                 "sched_fexp_name": "default",
             },
             {
                 "sched_type": "SCHED_TODO",
                 "sched_when": "EVERY:5m",
-                "sched_first_question": "Review the reply draft, approve if appropriate, move to done when posted",
+                "sched_first_question": "Work on the assigned task, move to done when complete",
                 "sched_fexp_name": "default",
             },
         ],
-        marketable_tags=["Marketing", "Social Media", "Engagement", "Reddit"],
+        marketable_tags=["Marketing", "Social Media", "Reddit", "Strategy"],
         marketable_forms=ckit_bot_install.load_form_bundles(__file__),
     )
     print(f"✅ {bot_name} v{bot_version} installed successfully")

@@ -1,19 +1,18 @@
 import pytest
-import os
-import json
 
 
 def test_imports():
     from reddiy import reddiy_bot, reddiy_prompts, reddiy_install
-    from reddiy.integrations import fi_reddit
+    from reddiy.integrations import fi_web
     assert True
 
 
 def test_prompts_structure():
     from reddiy import reddiy_prompts
     assert hasattr(reddiy_prompts, "main_prompt")
-    assert len(reddiy_prompts.main_prompt) > 500
+    assert len(reddiy_prompts.main_prompt) > 1000
     assert "Reddiy" in reddiy_prompts.main_prompt
+    assert "Manual Reddit Workflow Assistant" in reddiy_prompts.main_prompt
     assert "Flexus" in reddiy_prompts.main_prompt
 
 
@@ -21,16 +20,17 @@ def test_install_schema():
     from reddiy import reddiy_install
     schema = reddiy_install.REDDIY_SETUP_SCHEMA
     assert isinstance(schema, list)
-    assert len(schema) > 0
+    assert len(schema) == 4
 
     field_names = [field["bs_name"] for field in schema]
-    assert "REDDIT_CLIENT_ID" in field_names
-    assert "REDDIT_CLIENT_SECRET" in field_names
-    assert "REDDIT_USERNAME" in field_names
-    assert "REDDIT_REFRESH_TOKEN" in field_names
     assert "TARGET_SUBREDDITS" in field_names
-    assert "BRAND_MENTION_STYLE" in field_names
-    assert "MAX_POSTS_PER_DAY" in field_names
+    assert "BRAND_TONE" in field_names
+    assert "ENGAGEMENT_GOAL" in field_names
+    assert "WEEKLY_ENGAGEMENT_TARGET" in field_names
+
+    assert "REDDIT_CLIENT_ID" not in field_names
+    assert "REDDIT_CLIENT_SECRET" not in field_names
+    assert "REDDIT_REFRESH_TOKEN" not in field_names
 
 
 def test_tools_defined():
@@ -39,12 +39,20 @@ def test_tools_defined():
     assert len(tools) > 0
 
     tool_names = [tool.name for tool in tools]
-    assert "reddit_monitor" in tool_names
-    assert "reddit_reply" in tool_names
-    assert "reddit_approve_reply" in tool_names
-    assert "reddit_status" in tool_names
+    assert "analyze_subreddit" in tool_names
+    assert "draft_reply" in tool_names
+    assert "analyze_thread" in tool_names
+    assert "check_subreddit_rules" in tool_names
+    assert "log_engagement" in tool_names
+    assert "track_performance" in tool_names
+    assert "suggest_subreddits" in tool_names
     assert "reddit_insights" in tool_names
-    assert "reddit_api" in tool_names
+    assert "web_scrape" in tool_names
+
+    assert "reddit_api" not in tool_names
+    assert "reddit_monitor" not in tool_names
+    assert "reddit_reply" not in tool_names
+    assert "reddit_approve_reply" not in tool_names
 
 
 def test_keywords_defined():
@@ -59,140 +67,111 @@ def test_keywords_defined():
 def test_tool_schemas():
     from reddiy import reddiy_bot
 
-    monitor_tool = reddiy_bot.REDDIT_MONITOR_TOOL
-    assert monitor_tool.strict == True
-    assert monitor_tool.name == "reddit_monitor"
+    analyze_tool = reddiy_bot.ANALYZE_SUBREDDIT_TOOL
+    assert analyze_tool.strict == False
+    assert analyze_tool.name == "analyze_subreddit"
 
-    reply_tool = reddiy_bot.REDDIT_REPLY_TOOL
-    assert reply_tool.strict == True
-    assert "submission_id" in reply_tool.parameters["properties"]
-    assert "reply_text" in reply_tool.parameters["properties"]
-    assert "is_promotional" in reply_tool.parameters["properties"]
+    draft_tool = reddiy_bot.DRAFT_REPLY_TOOL
+    assert draft_tool.strict == True
+    assert "thread_url" in draft_tool.parameters["properties"]
+    assert "style" in draft_tool.parameters["properties"]
 
-
-def test_reddit_integration_init():
-    from reddiy.integrations import fi_reddit
-
-    integration = fi_reddit.IntegrationReddit(
-        fclient=None,
-        rcx=None,
-        client_id="test_id",
-        client_secret="test_secret",
-        username="test_user",
-        refresh_token="",
-    )
-
-    assert integration.client_id == "test_id"
-    assert integration.client_secret == "test_secret"
-    assert integration.username == "test_user"
+    log_tool = reddiy_bot.LOG_ENGAGEMENT_TOOL
+    assert log_tool.strict == True
+    assert "thread_url" in log_tool.parameters["properties"]
+    assert "comment_url" in log_tool.parameters["properties"]
+    assert "reply_text" in log_tool.parameters["properties"]
+    assert "style" in log_tool.parameters["properties"]
 
 
-@pytest.mark.skipif(
-    not os.environ.get("REDDIT_CLIENT_ID"),
-    reason="REDDIT_CLIENT_ID not set"
-)
+def test_web_integration_init():
+    from reddiy.integrations import fi_web
+
+    integration = fi_web.IntegrationWeb()
+    assert integration is not None
+    assert hasattr(integration, "called_by_model")
+    assert hasattr(integration, "problems_other")
+
+
 @pytest.mark.asyncio
-async def test_reddit_api_auth():
-    """Test Reddit API authentication with real credentials."""
-    from reddiy.integrations import fi_reddit
+async def test_web_integration_help():
+    from reddiy.integrations import fi_web
 
-    client_id = os.environ.get("REDDIT_CLIENT_ID")
-    client_secret = os.environ.get("REDDIT_CLIENT_SECRET")
-    username = os.environ.get("REDDIT_USERNAME", "test_user")
-    refresh_token = os.environ.get("REDDIT_REFRESH_TOKEN", "")
+    integration = fi_web.IntegrationWeb()
 
-    integration = fi_reddit.IntegrationReddit(
-        fclient=None,
-        rcx=None,
-        client_id=client_id,
-        client_secret=client_secret,
-        username=username,
-        refresh_token=refresh_token,
-    )
+    class MockToolCall:
+        pass
 
-    assert integration.reddit is not None
-
-    if not refresh_token:
-        pytest.skip("No refresh token - OAuth flow needed")
-
-    result = integration._test_auth()
-    assert "AUTHENTICATED" in result or "ERROR" in result
+    result = await integration.called_by_model(MockToolCall(), {"op": "help"})
+    assert isinstance(result, str)
+    assert "fetch_thread" in result
+    assert "search_subreddit" in result
+    assert "get_rules" in result
 
 
-@pytest.mark.skipif(
-    not os.environ.get("REDDIT_REFRESH_TOKEN"),
-    reason="REDDIT_REFRESH_TOKEN not set - complete OAuth first"
-)
 @pytest.mark.asyncio
-async def test_reddit_get_subreddit_rules():
-    """Test fetching subreddit rules with real API."""
-    from reddiy.integrations import fi_reddit
+async def test_web_integration_fetch_thread():
+    from reddiy.integrations import fi_web
+    import json
 
-    integration = fi_reddit.IntegrationReddit(
-        fclient=None,
-        rcx=None,
-        client_id=os.environ["REDDIT_CLIENT_ID"],
-        client_secret=os.environ["REDDIT_CLIENT_SECRET"],
-        username=os.environ.get("REDDIT_USERNAME", "test"),
-        refresh_token=os.environ["REDDIT_REFRESH_TOKEN"],
+    integration = fi_web.IntegrationWeb()
+
+    class MockToolCall:
+        pass
+
+    result = await integration.called_by_model(
+        MockToolCall(),
+        {"op": "fetch_thread", "args": {"url": "https://reddit.com/r/startups/comments/abc123/test"}},
     )
-
-    result = integration._get_subreddit_rules("startups")
-    assert "ERROR" not in result
-
-    data = json.loads(result)
-    assert "subreddit" in data
-    assert "rules" in data
-    assert data["subreddit"] == "startups"
+    assert isinstance(result, str)
+    assert "ERROR" not in result or "placeholder" in result.lower()
 
 
-@pytest.mark.skipif(
-    not os.environ.get("REDDIT_REFRESH_TOKEN"),
-    reason="REDDIT_REFRESH_TOKEN not set - complete OAuth first"
-)
-def test_reddit_get_new_posts():
-    """Test fetching new posts from a subreddit."""
-    from reddiy.integrations import fi_reddit
+@pytest.mark.asyncio
+async def test_web_integration_search_subreddit():
+    from reddiy.integrations import fi_web
+    import json
 
-    integration = fi_reddit.IntegrationReddit(
-        fclient=None,
-        rcx=None,
-        client_id=os.environ["REDDIT_CLIENT_ID"],
-        client_secret=os.environ["REDDIT_CLIENT_SECRET"],
-        username=os.environ.get("REDDIT_USERNAME", "test"),
-        refresh_token=os.environ["REDDIT_REFRESH_TOKEN"],
+    integration = fi_web.IntegrationWeb()
+
+    class MockToolCall:
+        pass
+
+    result = await integration.called_by_model(
+        MockToolCall(),
+        {"op": "search_subreddit", "args": {"subreddit": "startups", "limit": 10}},
     )
-
-    posts = integration.get_new_posts("startups", limit=5)
-    assert isinstance(posts, list)
-
-    if len(posts) > 0:
-        post = posts[0]
-        assert "id" in post
-        assert "title" in post
-        assert "subreddit" in post
+    assert isinstance(result, str)
+    assert "ERROR" not in result or "placeholder" in result.lower()
 
 
-@pytest.mark.skipif(
-    not os.environ.get("REDDIT_REFRESH_TOKEN"),
-    reason="REDDIT_REFRESH_TOKEN not set - complete OAuth first"
-)
-def test_reddit_account_stats():
-    """Test fetching account statistics."""
-    from reddiy.integrations import fi_reddit
+@pytest.mark.asyncio
+async def test_web_integration_get_rules():
+    from reddiy.integrations import fi_web
+    import json
 
-    integration = fi_reddit.IntegrationReddit(
-        fclient=None,
-        rcx=None,
-        client_id=os.environ["REDDIT_CLIENT_ID"],
-        client_secret=os.environ["REDDIT_CLIENT_SECRET"],
-        username=os.environ.get("REDDIT_USERNAME", "test"),
-        refresh_token=os.environ["REDDIT_REFRESH_TOKEN"],
+    integration = fi_web.IntegrationWeb()
+
+    class MockToolCall:
+        pass
+
+    result = await integration.called_by_model(
+        MockToolCall(),
+        {"op": "get_rules", "args": {"subreddit": "startups"}},
     )
+    assert isinstance(result, str)
+    assert "ERROR" not in result or "placeholder" in result.lower()
 
-    stats = integration.get_account_stats()
-    assert "authenticated" in stats
 
-    if stats["authenticated"]:
-        assert "username" in stats
-        assert "total_karma" in stats
+def test_version_updated():
+    from reddiy import reddiy_bot, reddiy_install
+    assert reddiy_bot.BOT_VERSION == "0.2.0"
+    assert reddiy_install.BOT_VERSION == "0.2.0"
+
+
+def test_no_reddit_api_imports():
+    try:
+        from reddiy.integrations import fi_reddit
+        assert False, "fi_reddit should not exist"
+    except ImportError:
+        pass

@@ -1,15 +1,15 @@
-# Reddiy - Reddit Engagement Bot for Flexus
+# Reddiy - Manual Reddit Workflow Assistant
 
-Reddiy is an autonomous Reddit engagement specialist bot that builds authentic brand awareness for Flexus by monitoring relevant discussions and engaging with value-first responses.
+Reddiy is your Reddit engagement strategist - helping you identify opportunities, draft authentic replies, and track performance through a **manual posting workflow**.
 
 ## Purpose
 
-Build Flexus brand awareness on Reddit through:
-- Finding relevant discussions about AI automation, business tools, and productivity
-- Providing genuine value and solving real problems first
-- Mentioning Flexus only when truly relevant and helpful
-- Building karma and reputation through authentic engagement
-- Maintaining safety through risk detection and approval workflows
+Build Flexus brand awareness on Reddit through strategic, authentic engagement:
+- Identify high-value discussion opportunities in target subreddits
+- Draft multiple reply options (helpful/moderate/promotional) with risk analysis
+- Track performance of manually posted content
+- Maintain authenticity through manual posting (no automation)
+- Learn what works through analytics and insights
 
 ## About Flexus
 
@@ -17,195 +17,160 @@ Flexus provides AI teammates that think, act, and take ownership like real speci
 - Different teammates for different tasks (idea validation, customer acquisition, growth)
 - They remember everything, work as a team, learn over time
 - Share collective intelligence across the workspace
-- Take initiative proactively but keep humans in the loop for important decisions
+- Take initiative proactively but keep humans in the loop
 - More than chatbots - autonomous specialists with tools and long-term memory
 
-## Target Audience
+## Key Philosophy
 
-Discussions about:
-- AI automation and AI agents
-- Business automation and workflow tools
-- SaaS products and startup operations
-- Productivity tools and team collaboration
-- Customer acquisition and growth hacking
-- Product validation and market research
+**No Reddit API Required** - This bot uses web scraping to analyze Reddit content. You post manually to maintain authenticity and avoid automation risks.
+
+**Quality Over Quantity** - Focus on building genuine relationships rather than spamming. Better to post 2 great replies than 10 mediocre ones.
+
+**Strategic Guidance** - Reddiy does the research, analysis, and drafting. You bring the human judgment and authenticity.
 
 ## Core Features
 
-### 1. Reddit OAuth Integration
+### 1. Opportunity Discovery
 
-- Secure OAuth2 authentication flow
-- Automatic token refresh
-- Uses PRAW (Python Reddit API Wrapper) library
-- Setup schema includes: REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET, REDDIT_USERNAME, REDDIT_REFRESH_TOKEN
+**analyze_subreddit**: Scan subreddits for engagement opportunities
+- Web scrapes recent posts (new and rising)
+- Identifies Flexus-relevant discussions
+- Scores each opportunity (0-100)
+- Returns top threads with context and reasoning
 
-### 2. Subreddit Monitoring
+**suggest_subreddits**: Recommend relevant communities
+- Searches for subreddits matching your keywords
+- Analyzes size, activity level, and relevance
+- Provides engagement strategy for each
 
-- Configurable list of target subreddits
-- Monitors every 15 minutes via scheduled job
-- Tracks new posts and rising posts
-- Keyword matching for Flexus-relevant topics
-- Stores monitored posts in MongoDB to avoid reprocessing
+### 2. Thread Analysis
 
-**Relevant Keywords**: ai automation, ai agents, business automation, workflow automation, productivity tool, saas tool, customer acquisition, growth hack, startup operation, team collaboration, product validation, market research, autonomous agent, ai teammate, ai assistant
+**analyze_thread**: Deep dive into specific thread
+- Fetches full thread content and comments
+- Assesses sentiment and key pain points
+- Calculates opportunity score
+- Identifies competition and risk factors
+- Recommends optimal engagement approach
 
-### 3. Smart Reply Engine
+**check_subreddit_rules**: Understand community guidelines
+- Scrapes subreddit rules from sidebar
+- Identifies self-promotion policies
+- Analyzes link posting restrictions
+- Recommends safe engagement strategy
 
-- Analyzes subreddit rules before posting
-- Generates contextual, value-first replies
-- Two reply modes:
-  - **Safe replies** (auto-post): Helpful information, no links, no brand mention
-  - **Promotional replies** (manual approval): Includes Flexus mention or link
+### 3. Reply Drafting
 
-### 4. Approval Workflow
+**draft_reply**: Generate reply options with reasoning
+- Creates 3 versions: helpful, moderate, promotional
+- Explains reasoning for each version
+- Assesses risk level (low/medium/high)
+- Stores drafts for reference
 
-Flags for manual approval when:
-- Reply includes a link
-- Post has >100 upvotes (high visibility)
-- Reply includes "Flexus" brand mention
-- Daily post limit approaching
+**Three Reply Styles:**
+- **Helpful** (Low Risk): Pure value, no brand mention, builds karma
+- **Moderate** (Medium Risk): Brief Flexus mention when contextually relevant
+- **Promotional** (High Risk): Full product description with link, use sparingly
 
-Creates kanban task with draft reply for human review. Approved replies post to Reddit and track metrics.
+### 4. Performance Tracking
 
-### 5. Risk Detection & Safety
+**log_engagement**: Record what you posted
+- User provides thread URL, comment URL, reply text, style
+- Stores for historical analysis
+- Builds performance dataset
 
-Tracks:
-- Comment removal rate (>10% triggers pause)
-- Downvote patterns (avg score monitoring)
-- Posting frequency (max posts per day/subreddit)
-- Subreddit-specific performance
+**track_performance**: Update metrics on posted content
+- User reports current upvotes and replies
+- Tracks growth over time
+- Provides performance feedback
 
-Pauses auto-posting if risk detected and creates alert task.
+**reddit_insights**: Analytics and recommendations
+- Aggregates performance across posts
+- Identifies best-performing subreddits and styles
+- Provides strategic recommendations
 
-### 6. Karma Building Strategy
+### 5. Daily Monitoring
 
-- Suggests "safe engagement" opportunities (no promotion)
-- Tracks which subreddits give best results
-- Spaces out activity naturally (default: max 20 posts/day)
-- Prioritizes value-first engagement
+**Scheduled Daily Digest** (Weekdays 8am):
+- Analyzes target subreddits automatically
+- Presents top 5 opportunities with scores
+- Posted to chat for user review
 
-### 7. Analytics & Insights
+## User Workflow
 
-Tracks:
-- Engagement metrics (upvotes, replies, karma)
-- Best-performing subreddits
-- Posting patterns and effectiveness
-- Daily summary reports
+### Daily Monitoring
+1. User: "Check r/startups for opportunities"
+2. Reddiy: Analyzes recent posts, presents top 3-5 with opportunity scores
+3. User: "Draft a reply for the second one"
+4. Reddiy: Provides 2-3 reply options (helpful/moderate/promotional) with reasoning
+5. User: Manually posts their chosen version on Reddit
+6. User: "I posted it, here's the link: [URL]"
+7. Reddiy: Logs it for tracking
+
+### Thread Analysis
+1. User: "Analyze this thread: https://reddit.com/r/startups/..."
+2. Reddiy: Full breakdown - sentiment, pain points, opportunity score, approach
+3. User: "Draft 3 reply options"
+4. Reddiy: Generates helpful/moderate/promotional versions with explanations
+5. User: Manually posts and reports back
+
+### Subreddit Research
+1. User: "Find subreddits interested in AI automation"
+2. Reddiy: Web search + analysis, recommends top subreddits with rationale
+3. User: "Analyze r/SaaS rules and culture"
+4. Reddiy: Fetches rules, analyzes culture, provides engagement strategy
 
 ## Bot Structure
 
 ```
 reddiy/
 ├── __init__.py
-├── reddiy_bot.py              # Main bot with scheduled monitoring
-├── reddiy_prompts.py          # System prompts for reply generation
+├── reddiy_bot.py              # Main bot with manual workflow tools
+├── reddiy_prompts.py          # System prompts for strategic guidance
 ├── reddiy_install.py          # Marketplace installation
 ├── reddiy-1024x1536.webp      # Marketplace image
 ├── reddiy-256x256.webp        # Avatar
 └── integrations/
     ├── __init__.py
-    └── fi_reddit.py           # Reddit OAuth integration module
+    └── fi_web.py              # Web scraping integration (no Reddit API)
 ```
-
-## Schedule
-
-**Every 15 minutes**:
-- Monitor target subreddits for new opportunities
-- Generate and post safe replies automatically
-- Create kanban tasks for promotional replies
-
-**Daily**:
-- Check account health and risk metrics
-- Generate analytics and insights report
-- Post summary to kanban
-
-**Every 5 minutes**:
-- Check inbox for approval tasks (SCHED_TASK_SORT)
-- Work on TODO approval tasks (SCHED_TODO)
 
 ## Tools
 
-### reddit_monitor
-Check target subreddits for new opportunities.
-- Scans new and rising posts
-- Matches against relevant keywords
-- Returns opportunities with context
-- Stores in MongoDB to avoid reprocessing
+### Discovery Tools
+- **analyze_subreddit**: Scan subreddit for opportunities
+- **suggest_subreddits**: Recommend relevant communities
+- **analyze_thread**: Deep analysis of specific thread
+- **check_subreddit_rules**: Fetch and analyze subreddit rules
 
-### reddit_reply
-Generate and post reply to a Reddit post.
-- `submission_id`: Reddit post ID
-- `reply_text`: The reply to post
-- `is_promotional`: True if mentions Flexus or includes links
-- Safe replies auto-post immediately
-- Promotional replies create kanban approval task
+### Drafting Tools
+- **draft_reply**: Generate reply options with reasoning
+- **web_scrape**: Direct web scraping access (fetch_thread, search_subreddit, get_rules, search_reddit)
 
-### reddit_approve_reply
-Approve and post queued reply from kanban task.
-- `task_id`: Kanban task ID with the reply
-- `approved`: True to post, False to reject
-- `edited_reply`: Optional edited version
-- Posts to Reddit and tracks metrics
-
-### reddit_status
-Check Reddit account health.
-- Account karma levels
-- Daily post count vs limit
-- Recent activity by subreddit
-- Removal rate and avg score per subreddit
-
-### reddit_insights
-Get analytics and recommendations.
-- `days`: Number of days to analyze (default: 7)
-- Total posts and breakdown by subreddit
-- Promotional vs value-only ratio
-- Strategy recommendations
-
-### reddit_api
-Direct Reddit API access for OAuth and data retrieval.
-- `get_auth_url`: Get OAuth authorization URL
-- `exchange_code`: Exchange code for refresh token
-- `test_auth`: Test authentication status
-- `get_submission`: Fetch post details
-- `get_comments`: Fetch post comments
-- `get_subreddit_rules`: Check subreddit rules
+### Tracking Tools
+- **log_engagement**: Record what user posted manually
+- **track_performance**: Update metrics on posted content
+- **reddit_insights**: Analytics and recommendations
 
 ### Standard Tools
-- `mongo_store`: File storage and retrieval
-- `flexus_policy_document`: Policy document management
-- `ask_questions`: Interactive user questions
-- `print_widget`: UI widgets for setup/navigation
-- `flexus_bot_kanban`: Kanban board operations
+- **mongo_store**: File storage and retrieval
+- **flexus_policy_document**: Policy document management
+- **ask_questions**: Interactive user questions
+- **print_widget**: UI widgets for setup/navigation
+- **flexus_bot_kanban**: Kanban board operations
 
 ## Setup Schema
-
-### Reddit API (Required)
-- **REDDIT_CLIENT_ID**: Reddit application client ID (from https://www.reddit.com/prefs/apps)
-- **REDDIT_CLIENT_SECRET**: Reddit application client secret
-- **REDDIT_USERNAME**: Reddit account username to post from
-- **REDDIT_REFRESH_TOKEN**: OAuth refresh token (obtained via OAuth flow, initially empty)
 
 ### Monitoring (Required)
 - **TARGET_SUBREDDITS**: Comma-separated list of subreddits (default: "startups,SaaS,Entrepreneur,smallbusiness")
 
 ### Engagement (Optional)
-- **BRAND_MENTION_STYLE**: How often to mention Flexus: subtle/moderate/direct (default: "moderate")
-- **MAX_POSTS_PER_DAY**: Maximum posts per day across all subreddits (default: 20)
+- **BRAND_TONE**: Brand voice: casual, professional, technical (default: "professional")
+- **ENGAGEMENT_GOAL**: Primary goal: awareness, leads, community (default: "awareness")
+- **WEEKLY_ENGAGEMENT_TARGET**: Target posts per week (default: 10)
 
 ## Setup Instructions
 
-### 1. Create Reddit Application
-
-1. Go to https://www.reddit.com/prefs/apps
-2. Click "Create App" or "Create Another App"
-3. Choose "script" type
-4. Name: "Flexus Reddiy Bot"
-5. Description: "Reddit engagement bot for Flexus"
-6. Redirect URI: http://localhost:8080
-7. Click "Create app"
-8. Copy the client ID (under app name) and secret
-
-### 2. Install and Configure Bot
+### 1. Install Bot
 
 ```bash
 # Install package
@@ -215,102 +180,160 @@ pip install -e /workspace
 python -m reddiy.reddiy_install --ws=$FLEXUS_WORKSPACE
 ```
 
-### 3. Complete OAuth Flow
+### 2. Configure Bot
 
-After hiring the bot in Flexus:
-1. Talk to Reddiy - it will detect missing credentials
-2. Enter REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET, REDDIT_USERNAME in bot settings
-3. Use the `reddit_api` tool with `op: "get_auth_url"` to get authorization URL
-4. Visit the URL and authorize the app
-5. Copy the code from the redirect URL (code parameter)
-6. Use `reddit_api` with `op: "exchange_code"` and the code
-7. Refresh token is automatically saved to bot settings
+After hiring in Flexus:
+1. Set TARGET_SUBREDDITS to communities you want to monitor
+2. Choose BRAND_TONE (casual/professional/technical)
+3. Set ENGAGEMENT_GOAL (awareness/leads/community)
+4. Adjust WEEKLY_ENGAGEMENT_TARGET based on capacity
 
-### 4. Configure Monitoring
+### 3. Start Using
 
-- Set TARGET_SUBREDDITS to communities you want to monitor
-- Adjust BRAND_MENTION_STYLE based on your approach
-- Set MAX_POSTS_PER_DAY to control activity level
+Talk to Reddiy to get started:
+- "Check r/startups for opportunities"
+- "Suggest subreddits for AI automation"
+- "Analyze this thread: [URL]"
+- "Draft a reply for this thread"
 
 ## MongoDB Collections
 
-### monitored_posts
-Tracks discovered posts to avoid reprocessing.
+### opportunities
+Discovered threads with analysis:
 ```json
 {
-  "post_id": "abc123",
+  "thread_url": "https://reddit.com/...",
   "subreddit": "startups",
   "title": "Looking for AI automation tools",
+  "opportunity_score": 85,
   "discovered_at": 1234567890.0,
-  "status": "discovered|replied|pending_approval|rejected",
-  "replied_at": 1234567890.0,
-  "task_id": "ktask_xyz"
+  "status": "discovered"
 }
 ```
 
-### activity_log
-Records all bot actions for analytics.
+### drafts
+Generated reply drafts:
 ```json
 {
-  "timestamp": 1234567890.0,
-  "action": "posted",
-  "details": {
-    "submission_id": "abc123",
-    "subreddit": "startups",
-    "reply_length": 250,
-    "is_promotional": false
-  }
+  "thread_url": "https://reddit.com/...",
+  "style": "moderate",
+  "draft_text": "This is what AI teammate platforms solve...",
+  "reasoning": "Brief Flexus mention in context",
+  "risk": "Medium - includes brand name",
+  "created_at": 1234567890.0
 }
 ```
 
-### risk_metrics
-Daily metrics per subreddit for risk monitoring.
+### posted_content
+User's manually posted content:
 ```json
 {
-  "date": "2026-02-12",
+  "thread_url": "https://reddit.com/...",
+  "comment_url": "https://reddit.com/...",
+  "reply_text": "Posted content",
+  "style": "helpful",
+  "posted_at": 1234567890.0,
+  "initial_upvotes": 1,
+  "current_upvotes": 15,
+  "current_replies": 3
+}
+```
+
+### performance_metrics
+Time-series tracking:
+```json
+{
+  "comment_url": "https://reddit.com/...",
+  "upvotes": 15,
+  "replies": 3,
+  "timestamp": 1234567890.0
+}
+```
+
+### subreddit_intelligence
+Learned patterns per subreddit:
+```json
+{
   "subreddit": "startups",
-  "post_count": 5,
-  "total_score": 25,
-  "removed_count": 0,
-  "last_updated": 1234567890.0
+  "rules": {...},
+  "last_analyzed": 1234567890.0,
+  "opportunity_count": 5,
+  "total_analyses": 10
 }
 ```
 
-## Brand Mention Guidelines
+## Reddit Best Practices
 
-### Subtle Style
-- Mention Flexus only if directly asked or extremely relevant
-- Focus on the category (AI teammates, autonomous agents)
-- Let the solution speak for itself
+### Build Trust First
+- Start with helpful replies (no promotion)
+- Establish karma and credibility
+- Participate authentically
+- Become a valued community member
 
-### Moderate Style (Default)
-- Mention Flexus when it directly solves stated problem
-- Brief description of capabilities
-- Always lead with value, product mention secondary
+### Know the Rules
+- Each subreddit has unique culture
+- Check rules before engaging
+- Some allow self-promotion, some don't
+- Always disclose affiliation
 
-### Direct Style
-- More liberal mentions but still value-first
-- Include more product details
-- Still avoid pure self-promotion
+### Timing Matters
+- Engage in newer threads (better visibility)
+- Respond to questions, not statements
+- Join active discussions
+- Avoid dead threads
 
-## Safety Rules
+### Authenticity Wins
+- Be transparent about working on Flexus
+- Focus on solving problems first
+- Share genuine insights, not pitches
+- Build relationships, not transactions
 
-**Never auto-post**:
-- Replies that violate subreddit rules
-- Pure self-promotion without value
-- Off-topic or forced mentions
-- Anything that could be seen as spam
+## Strategy Guide
 
-**Always flag for approval**:
-- Replies with external links
-- Mentions of "Flexus" brand name
-- Posts with >100 upvotes (high visibility)
-- Subreddits with strict anti-promotion rules
+### When to Use Each Reply Style
 
-**Risk Thresholds**:
-- Removal rate >10%: Pause and review
-- Average score <0: Pause and review
-- >5 posts/day per subreddit: Throttle
+**Helpful** (Lowest Risk):
+- New subreddits where you're building presence
+- Establishing karma and credibility
+- Topics where Flexus isn't the best fit
+- Building trust before any promotion
+
+**Moderate** (Medium Risk):
+- Threads where Flexus is contextually relevant
+- User asking about general solutions
+- You have established presence in subreddit
+- Natural fit for brief mention
+
+**Promotional** (High Risk):
+- User explicitly asking for tool recommendations
+- Perfect fit - Flexus directly solves stated problem
+- You have strong karma in subreddit
+- Thread allows self-promotion
+
+### Red Flags (Don't Engage)
+- Threads explicitly banning self-promotion
+- Low-quality or spam discussions
+- Completely unrelated topics
+- Hostile sentiment toward AI/automation
+- Dead threads (>48 hours old, no activity)
+
+### Green Flags (High Opportunity)
+- User asking for specific tool recommendations
+- Discussion of pain points Flexus solves
+- Technical audience interested in AI agents
+- Active thread (<12 hours old, <20 comments)
+- No competing product mentions yet
+
+## Schedule
+
+**Daily (Weekdays 8am):**
+- Analyze target subreddits
+- Present top 5 opportunities
+- Post summary to chat
+
+**Task Management:**
+- SCHED_TASK_SORT: Every 10 minutes
+- SCHED_TODO: Every 5 minutes
 
 ## Testing
 
@@ -319,16 +342,17 @@ Daily metrics per subreddit for risk monitoring.
 python -c "from reddiy import reddiy_bot, reddiy_prompts, reddiy_install; print('OK')"
 ```
 
-### Integration Tests
+### Unit Tests
 ```bash
 pytest tests/ -v
 ```
 
-Tests require real Reddit API credentials in environment:
-- REDDIT_CLIENT_ID
-- REDDIT_CLIENT_SECRET
-- REDDIT_USERNAME
-- REDDIT_REFRESH_TOKEN
+Tests verify:
+- Module imports work correctly
+- Tools are properly defined
+- Prompts are structured correctly
+- Setup schema is valid
+- Web scraping integration works
 
 ### Run Bot
 ```bash
@@ -338,18 +362,40 @@ python -m reddiy.reddiy_bot
 ## Dependencies
 
 - flexus-client-kit: Flexus platform integration
-- praw>=7.7.1: Python Reddit API Wrapper
-- prawcore>=2.4.0: PRAW core
 - motor>=3.3.2: Async MongoDB driver
 - pymongo>=4.6.1: MongoDB driver
 
+**No Reddit API dependencies** - uses web scraping only
+
+## Why Manual Workflow?
+
+**Maintains Authenticity:**
+- Real human posting = more genuine engagement
+- Avoids detection as bot/automation
+- Builds real relationships
+
+**Reduces Risk:**
+- No Reddit API rate limits
+- No account suspension risks
+- No OAuth complexity
+
+**Better Quality:**
+- Human judgment on every post
+- Context-aware decisions
+- Adapts to thread dynamics
+
+**Strategic Focus:**
+- Bot does research and drafting
+- Human provides judgment and authenticity
+- Best of both worlds
+
 ## Version
 
-0.1.0
+0.2.0
 
 ## Model
 
-grok-4-1-fast-reasoning (complex planning and analysis)
+grok-4-1-fast-reasoning (strategic analysis and planning)
 
 ## License
 
